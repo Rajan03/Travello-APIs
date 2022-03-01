@@ -1,11 +1,11 @@
-const AppError = require("../utils/appError");
+const AppError = require('../utils/appError');
 
 const errorConstants = {
-  devMode: "development",
-  prodMode: "production",
-  castError: "CastError",
+  devMode: 'development',
+  prodMode: 'production',
+  castError: 'CastError',
   duplicateError: 11000,
-  validationError: "ValidationError",
+  validationError: 'ValidationError',
 };
 
 // Error during development
@@ -48,11 +48,11 @@ const sendProdError = (res, error) => {
     error = handleValidationError(error);
 
     sendError(error.statusCode, error.status, error.message);
-  } 
-  
+  }
+
   // If no such case exists
   else {
-    sendError(500, "error", "Something is very wrong !!");
+    sendError(500, 'error', 'Something is very wrong !!');
   }
 };
 
@@ -60,7 +60,7 @@ const sendProdError = (res, error) => {
 // passing error as argument to next function in any controller or middleware
 module.exports = (err, req, res, next) => {
   err.statusCode = err.statusCode || 500;
-  err.status = err.status || "error";
+  err.status = err.status || 'error';
 
   // Error in Production mode is different from error in development mode.
   // Error in development mode.
@@ -89,7 +89,7 @@ const handleCastError = (error) => {
 };
 
 const handleDuplicateError = (err) => {
-  const keys = Object.keys(err.keyPattern).join(", ");
+  const keys = Object.keys(err.keyPattern).join(', ');
 
   return new AppError(
     400,
@@ -100,6 +100,6 @@ const handleDuplicateError = (err) => {
 const handleValidationError = (err) => {
   const errors = Object.values(err.errors).map((e) => e.message);
 
-  const errorMessage = `Ivalid data. ${errors.join(". ")}`;
+  const errorMessage = `Ivalid data. ${errors.join('. ')}`;
   return new AppError(400, errorMessage);
 };
