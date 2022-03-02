@@ -6,6 +6,8 @@ const errorConstants = {
   castError: 'CastError',
   duplicateError: 11000,
   validationError: 'ValidationError',
+  invalidJsonWebToken: 'JsonWebTokenError',
+  expiredToken: 'TokenExpiredError',
 };
 
 // Error during development
@@ -48,6 +50,17 @@ const sendProdError = (res, error) => {
     error = handleValidationError(error);
 
     sendError(error.statusCode, error.status, error.message);
+  }
+
+  // Case 4: JWT Invalid token
+  else if (error.name === errorConstants.invalidJsonWebToken) {
+    error = handleJWTError(error);
+    sendError(error.statusCode, error.status, error.message);
+  }
+
+  // Case 5: Token Expired
+  else if (error.name === errorConstants.expiredToken) {
+    error = handleJWTExpiredError(error);
   }
 
   // If no such case exists
@@ -103,3 +116,9 @@ const handleValidationError = (err) => {
   const errorMessage = `Ivalid data. ${errors.join('. ')}`;
   return new AppError(400, errorMessage);
 };
+
+const handleJWTError = (err) =>
+  new AppError(401, 'Cannot verify user please login again!');
+
+const handleJWTExpiredError = (err) =>
+  new AppError(401, 'Token Expired!! Login again please');
