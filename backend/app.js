@@ -28,6 +28,12 @@ if (process.env.NODE_ENV === 'development') {
 app.use(express.json());
 app.use(express.static(`${__dirname}/public`));
 
+// Setting request timing
+app.use((req, res, next) => {
+  req.requestTiming = new Date().toISOString();
+  next();
+});
+
 // Routes
 app.use('/api/v1/auth', authRoutes);
 app.use('/api/v1/tours', toursRoutes);
