@@ -57,3 +57,15 @@ exports.signinUser = catchAsync(async (req, res, next) => {
     data: { user },
   });
 });
+
+exports.forgotPassword = catchAsync(async (req, res, next) => {
+  res.status(201).json({
+    status: 'success',
+  });
+});
+
+exports.resetPassword = catchAsync(async (req, res, next) => {
+  res.status(201).json({
+    status: 'success',
+  });
+});
