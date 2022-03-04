@@ -1,8 +1,9 @@
 const jwt = require('jsonwebtoken');
-
+const crypto = require('crypto');
 const User = require('../models/userModel');
 const catchAsync = require('../utils/catchAsync');
 const AppError = require('../utils/appError');
+const { sendMail } = require('../utils/email');
 
 const signToken = (id) => {
   return jwt.sign({ id }, process.env.JWT_SECRET, {
@@ -73,14 +74,73 @@ exports.forgotPassword = catchAsync(async (req, res, next) => {
   await user.save({ validateBeforeSave: false });
 
   // Send token via Email
+  const resetURL = `${req.protocol}://${req.get(
+    'host'
+  )}/api/v1/auth/resetPassword/${resetToken}`;
 
-  res.status(201).json({
-    status: 'success',
-  });
+  const message = `Forgot your password ? \n Click on the link below to update your password \n \n
+  ${resetURL}. \n If ypu remember password please ignore this email`;
+
+  try {
+    await sendMail({
+      email: user.email,
+      subject: 'Reset Password Token (Valif for 10 Min)',
+      message,
+    });
+
+    res.status(200).json({
+      status: 'success',
+      message: 'Please check your email to update your password 😊',
+    });
+  } catch (error) {
+    // If failed send error as well as reset token.
+    user.passwordResetToken = undefined;
+    user.passwordResetTokenExpires = undefined;
+    console.log(error);
+    await user.save({ validateBeforeSave: false });
+    return next(
+      new AppError(
+        500,
+        'Something went wrong!! Failed to send Email! Please try again Later'
+      )
+    );
+  }
 });
 
 exports.resetPassword = catchAsync(async (req, res, next) => {
+  // Get user with token
+  const hashedToken = crypto
+    .createHash('sha256')
+    .update(req.params.token)
+    .digest('hex');
+
+  const user = await User.findOne({
+    passwordResetToken: hashedToken,
+    passwordResetTokenExpires: { $gt: Date.now() },
+  });
+  // Update password, If token is not expired and user exists
+  if (!user) {
+    return next(
+      new AppError(
+        400,
+        'Invalid request or request timed out! Please try again!!'
+      )
+    );
+  }
+  user.password = req.body.password;
+  user.passwordConfirm = req.body.passwordConfirm;
+  user.passwordResetToken = undefined;
+  user.passwordResetTokenExpires = undefined;
+
+  await user.save();
+  // Update changedPasswordAt property
+
+  // Log In user Sign JWT
+  const token = signToken(user._id);
+
   res.status(201).json({
     status: 'success',
+    token,
+    data: { user },
   });
 });

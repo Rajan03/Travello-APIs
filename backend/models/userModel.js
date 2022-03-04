@@ -44,6 +44,15 @@ const userSchema = mongoose.Schema({
   passwordResetTokenExpires: Date,
 });
 
+userSchema.pre('save', function (next) {
+  // If password not modified, return
+  if (!this.isModified('password') || this.isNew) return next();
+
+  // To make sure token is always created after the password is updated
+  this.passwordChangedAt = Date.now() - 1000;
+  next();
+});
+
 userSchema.pre('save', async function (next) {
   // If password not modified, return
   if (!this.isModified('password')) return next();
