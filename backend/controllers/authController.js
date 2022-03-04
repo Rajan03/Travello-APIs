@@ -59,6 +59,21 @@ exports.signinUser = catchAsync(async (req, res, next) => {
 });
 
 exports.forgotPassword = catchAsync(async (req, res, next) => {
+  // Get User with provided email
+  const user = await User.findOne({ email: req.body.email });
+
+  if (!user) {
+    return next(new AppError(404, 'No user with this email!!'));
+  }
+
+  // Generate random token
+  const resetToken = user.genratePswResetToken();
+
+  // Save the user with updated reset token
+  await user.save({ validateBeforeSave: false });
+
+  // Send token via Email
+
   res.status(201).json({
     status: 'success',
   });
