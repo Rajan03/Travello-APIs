@@ -42,8 +42,14 @@ const userSchema = mongoose.Schema({
   passwordChangedAt: Date,
   passwordResetToken: String,
   passwordResetTokenExpires: Date,
+  active: {
+    type: Boolean,
+    default: true,
+    select: false,
+  },
 });
 
+// Middleware
 userSchema.pre('save', function (next) {
   // If password not modified, return
   if (!this.isModified('password') || this.isNew) return next();
@@ -63,6 +69,11 @@ userSchema.pre('save', async function (next) {
   // Remove confirm password field
   this.passwordConfirm = undefined;
 
+  next();
+});
+
+userSchema.pre(/^find/, function (next) {
+  this.find({ active: { $ne: false } });
   next();
 });
 

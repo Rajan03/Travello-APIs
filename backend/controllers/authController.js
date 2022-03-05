@@ -11,6 +11,27 @@ const signToken = (id) => {
   });
 };
 
+const sendTokenResponse = (user, code, res) => {
+  const token = signToken(user._id);
+  const cookieOpts = {
+    expires: new Date(
+      Date.now() + process.env.JWT_COOKIE_EXPIRE_TIME * 24 * 60 * 1000
+    ),
+    httpOnly: true, // Prevent cross side scripting (Makes JWT read only)
+  };
+  if (process.env.NODE_ENV === 'production') cookieOpts.secure = true;
+
+  res.cookie('jwt', token, cookieOpts);
+
+  // Remove passwords if exists
+  user.password = undefined;
+  res.status(code).json({
+    status: 'success',
+    token,
+    data: { user },
+  });
+};
+
 // POST - /api/v1/auth/signup
 // @desc - Creates a new user
 exports.createUser = catchAsync(async (req, res, next) => {
@@ -23,13 +44,7 @@ exports.createUser = catchAsync(async (req, res, next) => {
 
   const user = await User.create(newUser);
 
-  const token = signToken(user._id);
-
-  res.status(201).json({
-    status: 'success',
-    token,
-    data: { user },
-  });
+  sendTokenResponse(user, 201, res);
 });
 
 // POST - /api/v1/auth/signin
@@ -50,15 +65,11 @@ exports.signinUser = catchAsync(async (req, res, next) => {
   }
 
   // 3. Sign token and send back.
-  const token = signToken(user._id);
-
-  res.status(201).json({
-    status: 'success',
-    token,
-    data: { user },
-  });
+  sendTokenResponse(user, 200, res);
 });
 
+// POST - /api/v1/auth/forgotPassword
+// @desc - Sends mail with reset password link generated on this route
 exports.forgotPassword = catchAsync(async (req, res, next) => {
   // Get User with provided email
   const user = await User.findOne({ email: req.body.email });
@@ -107,6 +118,8 @@ exports.forgotPassword = catchAsync(async (req, res, next) => {
   }
 });
 
+// PATCH - /api/v1/auth/resetPassword/:token
+// @desc - Allows to reset password
 exports.resetPassword = catchAsync(async (req, res, next) => {
   // Get user with token
   const hashedToken = crypto
@@ -133,14 +146,32 @@ exports.resetPassword = catchAsync(async (req, res, next) => {
   user.passwordResetTokenExpires = undefined;
 
   await user.save();
-  // Update changedPasswordAt property
-
+  // Update changedPasswordAt property (In pre save middleware)
   // Log In user Sign JWT
-  const token = signToken(user._id);
-
-  res.status(201).json({
-    status: 'success',
-    token,
-    data: { user },
-  });
+  sendTokenResponse(user, 200, res);
 });
+
+// PATCH - /api/v1/auth/resetPassword/:token
+// @desc - Allows to update password
+exports.updatePassword = catchAsync(async (req, res, next) => {
+  // Get user
+  const user = await User.findById(req.user.id).select('+password');
+
+  // Check for posted password
+  if (!user.isCorrectPassword(req.body.currentPassword, user.password)) {
+    return next(new AppError(401, 'Password did not with current password '));
+  }
+
+  // Update password
+  user.password = req.body.password;
+  user.passwordConfirm = req.body.passwordConfirm;
+
+  await user.save();
+
+  // login user withnew password, send JWT
+  sendTokenResponse(user, 201, res);
+});
+
+// @TODO: Implement maximum login attempts fuctionality
+// @TODO: Implement confirm email on creating new account
+// @TODO: Try out two factor authentication
