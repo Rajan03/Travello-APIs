@@ -5,7 +5,7 @@ const AppError = require('../utils/appError');
 const filterObj = ([obj, ...allowedFields]) => {
   const newObj = {};
 
-  obj.keys(obj).forEach((el) => {
+  Object.keys(obj).forEach((el) => {
     if (allowedFields.includes(el)) {
       newObj[el] = obj[el];
     }
@@ -13,6 +13,32 @@ const filterObj = ([obj, ...allowedFields]) => {
 
   return newObj;
 };
+
+// GET - /api/v1/user/:id
+// @desc - Get details about single user
+exports.userDetails = catchAsync(async (req, res, next) => {
+  const user = await User.findById(req.user.id);
+
+  res.status(200).json({
+    status: 'success',
+    data: {
+      user,
+    },
+  });
+});
+
+// GET - /api/v1/user
+// @desc - Get all about single user
+exports.allUsers = catchAsync(async (req, res, next) => {
+  const users = await User.find();
+
+  res.status(200).json({
+    status: 'success',
+    data: {
+      users,
+    },
+  });
+});
 
 // PATCH - /api/v1/user/me
 // @desc - updates current logged in user data
@@ -35,10 +61,6 @@ exports.updateMe = catchAsync(async (req, res, next) => {
       user: updatedUser,
     },
   });
-
-  const user = await User.create(newUser);
-
-  sendTokenResponse(user, 201, res);
 });
 
 // DELETE - /api/v1/user/me
@@ -50,8 +72,7 @@ exports.deleteMe = catchAsync(async (req, res, next) => {
     status: 'success',
     data: null,
   });
-
-  const user = await User.create(newUser);
-
-  sendTokenResponse(user, 201, res);
 });
+
+// @Todo: deleted user can update himself ?
+// @Todo: Logging In user should activate user

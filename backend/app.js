@@ -8,7 +8,9 @@ const hpp = require('hpp');
 
 // Routes Imports
 const authRoutes = require('./routes/authRoutes');
+const userRoutes = require('./routes/userRoutes');
 const toursRoutes = require('./routes/toursRoutes');
+const reviewRoutes = require('./routes/reviewRoutes');
 
 // Global Error Class/ Middleware
 const AppError = require('./utils/appError');
@@ -76,8 +78,9 @@ app.use((req, res, next) => {
 
 // ROUTES
 app.use('/api/v1/auth', authRoutes);
-app.use('/api/v1/user', authRoutes);
+app.use('/api/v1/user', userRoutes);
 app.use('/api/v1/tours', toursRoutes);
+app.use('/api/v1/reviews', reviewRoutes);
 
 app.use('*', (req, res, next) => {
   next(new AppError(404, `Can\'t find ${req.originalUrl} on this server!!`));

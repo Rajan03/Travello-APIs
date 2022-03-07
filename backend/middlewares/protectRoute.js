@@ -56,7 +56,9 @@ exports.protect = catchAsync(async (req, res, next) => {
 exports.authorizedFor = (...roles) => {
   return (req, res, next) => {
     if (!roles.includes(req.user.role)) {
-      return next(403, 'You have no permission to delete tour!!');
+      return next(
+        new AppError(403, 'You have no permission to perform this action!!')
+      );
     }
     next();
   };
