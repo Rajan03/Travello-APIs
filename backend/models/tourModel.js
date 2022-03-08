@@ -113,6 +113,20 @@ const tourSchema = new mongoose.Schema(
   }
 );
 
+// VIRTUAL PROPERTIES
+tourSchema.virtual('durationInWeeks', function () {
+  return this.duration / 7;
+});
+
+// VIRTUAL POPULATE
+tourSchema.virtual('reviews', {
+  ref: 'Review',
+  // Reference doc has reference to this doc with name ?
+  foreignField: 'tour',
+  // this doc has foreignField with name ?
+  localField: '_id',
+});
+
 // MONGOOSE: DOCUMENT MIDDLEWARE
 tourSchema.pre('save', function (next) {
   this.slug = slugify(this.name, { lower: true });

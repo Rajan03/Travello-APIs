@@ -58,7 +58,7 @@ exports.updateTour = catchAsync(async (req, res, next) => {
 // @desc - get tour by id
 // Error code - t-102
 exports.getTourById = catchAsync(async (req, res, next) => {
-  const tour = await Tour.findById(req.params.id);
+  const tour = await Tour.findById(req.params.id).populate('reviews');
 
   if (!tour) {
     return new AppError('No tour with this id exists', 404);

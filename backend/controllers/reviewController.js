@@ -6,7 +6,11 @@ const AppError = require('../utils/appError');
 // @desc - gets all tours
 // Error code - t-102
 exports.getReviews = catchAsync(async (req, res, next) => {
-  const reviews = await Review.find();
+  let filter = {};
+  if (req.body.tourId) {
+    filter = { tour: req.body.tourId };
+  }
+  const reviews = await Review.find(filter);
 
   res.status(200).json({
     status: 'success',
@@ -21,8 +25,10 @@ exports.getReviews = catchAsync(async (req, res, next) => {
 // @desc - Creates a new review
 // Error code - r-101
 exports.createReview = catchAsync(async (req, res, next) => {
+  if (!req.body.tour) req.body.tour = req.params.tourId;
+  if (!req.body.user) req.body.user = req.user.id;
+
   const review = await Review.create(req.body);
-  console.log(review);
 
   res.status(201).json({
     status: 'success',

@@ -2,7 +2,7 @@ const express = require('express');
 const reviewsController = require('../controllers/reviewController');
 const { protect, authorizedFor } = require('../middlewares/protectRoute');
 
-const router = express.Router();
+const router = express.Router({ mergeParams: true });
 
 router
   .route('/')
