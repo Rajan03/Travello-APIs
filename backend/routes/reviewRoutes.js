@@ -6,7 +6,20 @@ const router = express.Router({ mergeParams: true });
 
 router
   .route('/')
-  .get(reviewsController.getReviews)
+  .get(
+    protect,
+    authorizedFor('admin', 'lead-guide'),
+    reviewsController.getReviews
+  )
   .post(protect, authorizedFor('user'), reviewsController.createReview);
+
+router
+  .route('/:id')
+  .delete(
+    protect,
+    authorizedFor('admin', 'user'),
+    reviewsController.deleteReview
+  )
+  .patch(protect, authorizedFor('user'), reviewsController.updatReview);
 
 module.exports = router;

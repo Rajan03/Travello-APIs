@@ -1,8 +1,9 @@
 const Review = require('../models/reviewModel');
 const catchAsync = require('../utils/catchAsync');
 const AppError = require('../utils/appError');
+const { deleteOne, updateOne } = require('./handlersFactory');
 
-// GET - /api/v1/tours
+// GET - /api/v1/tours/:tourId/reviews
 // @desc - gets all tours
 // Error code - t-102
 exports.getReviews = catchAsync(async (req, res, next) => {
@@ -21,7 +22,7 @@ exports.getReviews = catchAsync(async (req, res, next) => {
   });
 });
 
-// POST - /api/v1/tours
+// POST - /api/v1/tours/:tourId/reviews
 // @desc - Creates a new review
 // Error code - r-101
 exports.createReview = catchAsync(async (req, res, next) => {
@@ -37,3 +38,12 @@ exports.createReview = catchAsync(async (req, res, next) => {
     },
   });
 });
+
+// DELETE - /api/v1/tours/:tourId/reviews/:id
+// @desc - delete review by id
+// Error code - t-102
+exports.deleteReview = deleteOne(Review);
+
+// PATCH - /api/v1/tours/:tourId/reviews/:id
+// @desc - updates current logged in user data
+exports.updatReview = updateOne(Review);

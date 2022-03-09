@@ -10,13 +10,17 @@ router.use('/:tourId/reviews', reviewRouter);
 
 router
   .route('/')
-  .get(protect, toursController.getTours)
-  .post(toursController.createTour);
+  .get(toursController.getTours)
+  .post(
+    protect,
+    authorizedFor('admin', 'lead-guide'),
+    toursController.createTour
+  );
 
 router
   .route('/:id')
   .get(toursController.getTourById)
-  .patch(toursController.updateTour)
+  .patch(authorizedFor('admin', 'lead-guide'), toursController.updateTour)
   .delete(
     protect,
     authorizedFor('admin', 'lead-guide'),

@@ -1,6 +1,7 @@
 const User = require('../models/userModel');
 const catchAsync = require('../utils/catchAsync');
 const AppError = require('../utils/appError');
+const { deleteOne, updateOne } = require('./handlersFactory');
 
 const filterObj = ([obj, ...allowedFields]) => {
   const newObj = {};
@@ -40,8 +41,16 @@ exports.allUsers = catchAsync(async (req, res, next) => {
   });
 });
 
+// DELETE - /api/v1/user/:id
+// @desc - deletes user account permanently by admin
+exports.deleteUser = deleteOne(User);
+
+// PATCH - /api/v1/user/:id
+// @desc - updates any user document by its id by admin (Not for passwords)
+exports.updateUser = updateOne(User);
+
 // PATCH - /api/v1/user/me
-// @desc - updates current logged in user data
+// @desc - updates current logged in user data (Not for passwords)
 exports.updateMe = catchAsync(async (req, res, next) => {
   // Error if password exists
   if (req.body.password || req.body.passwordComnfirm) {

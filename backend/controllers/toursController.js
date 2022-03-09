@@ -2,6 +2,7 @@ const Tour = require('../models/tourModel');
 const catchAsync = require('../utils/catchAsync');
 const ApiFeature = require('../utils/apiFeatures');
 const AppError = require('../utils/appError');
+const { deleteOne, updateOne } = require('./handlersFactory');
 
 // POST - /api/v1/tours
 // @desc - Creates a new tour
@@ -40,19 +41,7 @@ exports.getTours = catchAsync(async (req, res, next) => {
 // PATCH - /api/v1/tours
 // @desc - update tour
 // Error code - t-103
-exports.updateTour = catchAsync(async (req, res, next) => {
-  const tour = await Tour.findByIdAndUpdate(req.params.id, req.body, {
-    new: true,
-    runValidators: true,
-  });
-
-  res.status(200).json({
-    status: 'success',
-    data: {
-      tour,
-    },
-  });
-});
+exports.updateTour = updateOne(Tour);
 
 // GET - /api/v1/tours/:id
 // @desc - get tour by id
@@ -75,17 +64,7 @@ exports.getTourById = catchAsync(async (req, res, next) => {
 // DELETE - /api/v1/tours/:id
 // @desc - delete tour by id
 // Error code - t-102
-exports.deleteTourById = catchAsync(async (req, res, next) => {
-  const tour = await Tour.findByIdAndDelete(req.params.id);
-
-  if (!tour) {
-    return new AppError('No tour with this id exists', 404);
-  }
-
-  res.status(204).json({
-    status: 'success',
-  });
-});
+exports.deleteTourById = deleteOne(Tour);
 
 // @TODO: Implement error codes for debugging
 // @TODO: Try out aggregate pipelines from mongo db
