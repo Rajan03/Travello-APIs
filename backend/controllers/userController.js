@@ -1,7 +1,7 @@
 const User = require('../models/userModel');
 const catchAsync = require('../utils/catchAsync');
 const AppError = require('../utils/appError');
-const { deleteOne, updateOne } = require('./handlersFactory');
+const { deleteOne, updateOne, getOne, getAll } = require('./handlersFactory');
 
 const filterObj = ([obj, ...allowedFields]) => {
   const newObj = {};
@@ -17,29 +17,11 @@ const filterObj = ([obj, ...allowedFields]) => {
 
 // GET - /api/v1/user/:id
 // @desc - Get details about single user
-exports.userDetails = catchAsync(async (req, res, next) => {
-  const user = await User.findById(req.user.id);
-
-  res.status(200).json({
-    status: 'success',
-    data: {
-      user,
-    },
-  });
-});
+exports.userDetails = getOne(User);
 
 // GET - /api/v1/user
 // @desc - Get all about single user
-exports.allUsers = catchAsync(async (req, res, next) => {
-  const users = await User.find();
-
-  res.status(200).json({
-    status: 'success',
-    data: {
-      users,
-    },
-  });
-});
+exports.allUsers = getAll(User);
 
 // DELETE - /api/v1/user/:id
 // @desc - deletes user account permanently by admin
@@ -48,6 +30,13 @@ exports.deleteUser = deleteOne(User);
 // PATCH - /api/v1/user/:id
 // @desc - updates any user document by its id by admin (Not for passwords)
 exports.updateUser = updateOne(User);
+
+//============= My routes (Logged In users) =================================
+
+exports.getMe = (req, res, next) => {
+  req.params.id = req.user.id;
+  next();
+};
 
 // PATCH - /api/v1/user/me
 // @desc - updates current logged in user data (Not for passwords)
