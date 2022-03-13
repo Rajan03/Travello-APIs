@@ -20,7 +20,11 @@ router
 router
   .route('/:id')
   .get(toursController.getTourById)
-  .patch(authorizedFor('admin', 'lead-guide'), toursController.updateTour)
+  .patch(
+    protect,
+    authorizedFor('admin', 'lead-guide'),
+    toursController.updateTour
+  )
   .delete(
     protect,
     authorizedFor('admin', 'lead-guide'),

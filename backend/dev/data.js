@@ -3,6 +3,7 @@ const mongoose = require('mongoose');
 const dotenv = require('dotenv');
 const Tour = require('../models/tourModel');
 const User = require('../models/userModel');
+const Review = require('../models/reviewModel');
 
 dotenv.config({ path: './.env' });
 
@@ -17,11 +18,14 @@ mongoose
 // READ JSON FILE
 const tours = JSON.parse(fs.readFileSync(`${__dirname}/tours.json`, 'utf-8'));
 const users = JSON.parse(fs.readFileSync(`${__dirname}/users.json`, 'utf-8'));
+const reviews = JSON.parse(
+  fs.readFileSync(`${__dirname}/reviews.json`, 'utf-8')
+);
 
 // IMPORT DATA INTO DB
 const importData = async (model, data) => {
   try {
-    await model.create(data);
+    await model.create(data, { validateBeforeSave: false });
     console.log(`${data.length} Documents added!`);
   } catch (err) {
     console.log(err);
@@ -40,18 +44,36 @@ const deleteData = async (model) => {
   process.exit();
 };
 
-// Tours Data
-if (process.argv[2] === '--import-tours') {
-  importData(Tour, tours);
-} else if (process.argv[2] === '--delete-tours') {
-  deleteData(Tour);
-}
-// Users Data
-else if (process.argv[2] === '--import-users') {
-  users.forEach((user) => {
-    user.passwordConfirm = user.password;
-  });
-  importData(User, users);
-} else if (process.argv[2] === '--delete-users') {
-  deleteData(User);
+switch (process.argv[2]) {
+  case '--import':
+    importData(Tour, tours);
+    importData(User, users);
+    importData(Review, reviews);
+    break;
+  case '--delete':
+    deleteData(Tour);
+    deleteData(User);
+    deleteData(Review);
+    break;
+  case '--import-tours':
+    importData(Tour, tours);
+    break;
+  case '--delete-tours':
+    deleteData(Tour);
+    break;
+  case '--import-users':
+    importData(User, users);
+    break;
+  case '--delete-users':
+    deleteData(User);
+    break;
+  case '--import-reviews':
+    importData(Review, reviews);
+    break;
+  case '--delete-reviews':
+    deleteData(Review);
+    break;
+
+  default:
+    break;
 }

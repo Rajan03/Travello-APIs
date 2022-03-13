@@ -6,18 +6,19 @@ const {
   allUsers,
   deleteUser,
   updateUser,
+  getMe,
 } = require('../controllers/userController');
 const { protect, authorizedFor } = require('../middlewares/protectRoute');
 
 const router = express.Router();
+router.use(protect);
 
-router.route('/').get(protect, authorizedFor('admin'), allUsers);
-router
-  .route('/:id')
-  .get(protect, userDetails)
-  .delete(protect, authorizedFor('admin'), deleteUser)
-  .patch(protect, authorizedFor('admin'), updateUser);
+// /me routes
+router.route('/me').get(getMe, userDetails).patch(updateMe).delete(deleteMe);
 
-router.route('/me').patch(protect, updateMe).delete(protect, deleteMe);
+router.use(authorizedFor('admin'));
+
+router.route('/').get(allUsers);
+router.route('/:id').get(userDetails).delete(deleteUser).patch(updateUser);
 
 module.exports = router;
