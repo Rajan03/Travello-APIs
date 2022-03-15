@@ -9,6 +9,9 @@ const router = express.Router();
 router.use('/:tourId/reviews', reviewRouter);
 
 router
+  .route('/tour-within/:distance/center/:latlng/unit/:unit')
+  .get(toursController.getTourWithin);
+router
   .route('/')
   .get(toursController.getTours)
   .post(
