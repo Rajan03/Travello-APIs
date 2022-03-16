@@ -8,9 +8,12 @@ const router = express.Router();
 // Nesting Routes
 router.use('/:tourId/reviews', reviewRouter);
 
+router.route('/distance/:latlng/unit/:unit').get(toursController.getDistances);
+
 router
   .route('/tour-within/:distance/center/:latlng/unit/:unit')
   .get(toursController.getTourWithin);
+
 router
   .route('/')
   .get(toursController.getTours)

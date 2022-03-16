@@ -61,5 +61,42 @@ exports.getTourWithin = catchAsync(async (req, res, next) => {
     },
   });
 });
+
+exports.getDistances = catchAsync(async (req, res, next) => {
+  // /distance/:latlng/unit/:unit
+  const { latlng, unit } = req.params;
+  const [lat, lng] = latlng.split(',');
+
+  if (!lat || !lng) {
+    next(
+      new AppError(
+        400,
+        'Please provide latitude and longitude as <lat,lng> format.'
+      )
+    );
+  }
+
+  // Note: If multiple fields with geospatial indexes,
+  // then use keys parameterfor geoNear to identify on which field calculation is to be performed
+  const distances = await Tour.aggregate([
+    {
+      $geoNear: {
+        near: {
+          type: 'Point',
+          coordinates: [lng * 1, lat * 1],
+        },
+        distanceField: 'distance',
+      },
+    },
+  ]);
+
+  res.status(200).json({
+    message: 'success',
+    data: {
+      distances,
+    },
+  });
+});
+
 // @TODO: Implement error codes for debugging
 // @TODO: Try out aggregate pipelines from mongo db

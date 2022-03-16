@@ -112,7 +112,7 @@ const tourSchema = new mongoose.Schema(
     toObject: { virtuals: true },
   }
 );
-// Indexes
+// GEO SPHERE INDEX
 tourSchema.index({ startLocation: '2dsphere' });
 
 // VIRTUAL PROPERTIES
