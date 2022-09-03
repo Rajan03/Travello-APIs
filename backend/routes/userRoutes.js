@@ -7,6 +7,8 @@ const {
   deleteUser,
   updateUser,
   getMe,
+  uploadImage,
+  resizeUserImage,
 } = require('../controllers/userController');
 const { protect, authorizedFor } = require('../middlewares/protectRoute');
 
@@ -14,8 +16,13 @@ const router = express.Router();
 router.use(protect);
 
 // /me routes
-router.route('/me').get(getMe, userDetails).patch(updateMe).delete(deleteMe);
+router
+  .route('/me')
+  .get(getMe, userDetails)
+  .patch(uploadImage, resizeUserImage, updateMe)
+  .delete(deleteMe);
 
+// Routes authorized for admin only
 router.use(authorizedFor('admin'));
 
 router.route('/').get(allUsers);
