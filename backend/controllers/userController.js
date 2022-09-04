@@ -5,9 +5,6 @@ const catchAsync = require('../utils/catchAsync');
 const AppError = require('../utils/appError');
 const { deleteOne, updateOne, getOne, getAll } = require('./handlersFactory');
 
-// Multer config - Storage
-const multerStorage = multer.memoryStorage();
-
 // multer.diskStorage({
 //   destination: (req, file, cb) => {
 //     cb(null, imageDestination);
@@ -17,6 +14,9 @@ const multerStorage = multer.memoryStorage();
 //     cb(null, `user-${req.user.id}-${Date.now()}.${ext}`);
 //   },
 // });
+
+// Multer config - Storage
+const multerStorage = multer.memoryStorage();
 
 // Multer config - Filter
 const multerFilter = (req, file, cb) => {
